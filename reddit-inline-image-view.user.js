@@ -210,7 +210,7 @@ function makeImageZoomable(imgTag)
 }
 
 // Main entry
-$(document).ready(function()
+(function()
 {
     var header = document.getElementById('header-bottom-left');
     var uls = header.getElementsByTagName('ul');
@@ -223,10 +223,11 @@ $(document).ready(function()
             var a = document.createElement('a');
             var text = document.createTextNode('view images');
 
-            // view images on subreddit page & in comment section.
-            var javascript = "javascript: viewImages(\"#siteTable div.entry p.title a.title\"); viewImages(\".usertext-body a\");";
-
-            a.setAttribute('href',javascript);
+            a.setAttribute('href','javascript:void(0);');  // just for arrow cursor
+            a.addEventListener("click", function() { 
+                viewImages("#siteTable div.entry p.title a.title");  // topics
+                viewImages(".usertext-body a");  // comment section
+            }, false);
             a.appendChild(text);
             li.appendChild(a);
             uls[i].appendChild(li);
