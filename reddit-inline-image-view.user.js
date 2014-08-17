@@ -1,7 +1,8 @@
 // ==UserScript==
-// @name           Reddit Inline Image View
-// @namespace      http://github.com/RobSis/reddit-inline-images-view
-// @description    Shows directly linked images or imgur images in the current page
+// @name           reddit-inline-image-view
+// @namespace      http://github.com/RobSis/
+// @updateURL      https://github.com/RobSis/reddit-inline-image-view/blob/master/reddit-inline-image-view.user.js
+// @description    Shows directly linked images or imgur images in the current page.
 // @version        1.0
 // @require        https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 // @include        http://www.reddit.com/*
@@ -10,7 +11,7 @@
 
 /*
  * Based on script by /u/drowsap: http://www.reddit.com/r/AskReddit/comments/9ydts/c0f0ltr
- * and drag-resizing code from honestbleep's Reddit Enhancement Suite.
+ * drag-resizing code from honestbleep's Reddit Enhancement Suite.
  *
  *
  * This program is free software: you can redistribute it and/or modify
