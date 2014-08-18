@@ -11,7 +11,7 @@
 
 /*
  * Based on script by /u/drowsap: http://www.reddit.com/r/AskReddit/comments/9ydts/c0f0ltr
- * drag-resizing code from honestbleep's Reddit Enhancement Suite.
+ * and drag-resizing code from honestbleep's Reddit Enhancement Suite.
  *
  *
  * This program is free software: you can redistribute it and/or modify
@@ -58,30 +58,83 @@ function viewImages(find_string)
 {
     var x = $(".content").find(find_string).each(function()
     {
-        var href=$(this).attr("href");
-        var title_text=$(this).text();
-        if ((!$(this).hasClass("rexMorphed")) && ($(this).next(".rexMorphed").length == 0) && href &&
-                (href.indexOf('imgur.') >= 0 || href.indexOf('.jpeg') >= 0 || href.indexOf('.jpg') >= 0 || href.indexOf('.gif') >= 0 || href.indexOf('.png') >= 0))
-        {
-            // add .jpg extension to imgur links without one
-            var ext = (href.indexOf('imgur.') >= 0 && href.indexOf('.jpg') < 0 && href.indexOf('.png') < 0 && href.indexOf('.gif') < 0) ? '.jpg' : '';
-            var img = document.createElement('img');
-            img.setAttribute('class', 'rexMorphed');
-            img.setAttribute('style', 'display:block;max-width:500px;');  // TODO: get width of main content div?
-            img.setAttribute('src', href+ext);
-            imageData[img] = {
-                zindex: img.style.zIndex,
-                width: img.style.width,
-                height: img.style.height,
-                position: img.style.position,
-                resized: 0,
-                resizable: true
-            }
-            makeImageZoomable(img);
-            $(this).after(img);
-        }
+        viewImage($(this));
     });
 };
+
+/*
+ * Expand the image link specified by given 'a' element.
+ * (Add 'img' element after it)
+ */
+function viewImage(a)
+{
+    if ((a.hasClass("rexImage")) && (a.next(".rexMorphed").length == 0))
+    {
+        // add .jpg extension to imgur links without one
+        var href=a.attr("href");
+        var ext = (href.indexOf('imgur.') >= 0 && href.indexOf('.jpg') < 0 && href.indexOf('.png') < 0 && href.indexOf('.gif') < 0) ? '.jpg' : '';
+
+        var img = document.createElement('img');
+        img.setAttribute('class', 'rexMorphed');
+        img.setAttribute('style', 'display:block;max-width:500px;');  // TODO: get width of main content div?
+        img.setAttribute('src', href+ext);
+
+        imageData[img] = {
+            zindex: img.style.zIndex,
+            width: img.style.width,
+            height: img.style.height,
+            position: img.style.position,
+            resized: 0,
+            resizable: true
+        }
+        makeImageZoomable(img);
+        a.parent().parent().append(img);
+    }
+}
+
+/*
+ * Collapse the image link specified by given 'a' element.
+ * (Remove 'img' element after it)
+ */
+function hideImage(a)
+{
+    a.parent().parent().find(".rexMorphed").remove();
+}
+
+/*
+ * Inject expand buttons to any image that can be expanded.
+ */
+function injectExpandos(find_string, comments)
+{
+    var x = $(".content").find(find_string).each(function()
+    {
+        var a=$(this).find("a")
+        if (!comments)
+        {
+            a=$(this).find("a.title")
+        }
+        var href=a.attr("href");
+        var title_text=a.text();
+        if ((!a.hasClass("rexMorphed")) && (a.next(".rexMorphed").length == 0) && href &&
+                (href.indexOf('imgur.') >= 0 || href.indexOf('.jpeg') >= 0 || href.indexOf('.jpg') >= 0 || href.indexOf('.gif') >= 0 || href.indexOf('.png') >= 0))
+        {
+            a.addClass('rexImage');
+            var theDiv = document.createElement("div");
+            theDiv.setAttribute("class", "expando-button collapsed selftext");
+            theDiv.addEventListener("click", function()
+                {
+                    if (theDiv.className.indexOf("collapsed") > 0) {
+                        theDiv.setAttribute("class", "expando-button expanded selftext");
+                        viewImage(a);
+                    } else {
+                        theDiv.setAttribute("class", "expando-button collapsed selftext");
+                        hideImage(a);
+                    }
+                });
+            a.parent().after(theDiv);
+        }
+    });
+}
 
 /*
  * Set up events for the given img element to make it zoomable via
@@ -213,6 +266,9 @@ function makeImageZoomable(imgTag)
 // Main entry
 (function()
 {
+    injectExpandos("#siteTable div.entry", false);
+    injectExpandos(".usertext-body .md", true);
+
     var header = document.getElementById('header-bottom-left');
     var uls = header.getElementsByTagName('ul');
 
@@ -225,9 +281,9 @@ function makeImageZoomable(imgTag)
             var text = document.createTextNode('view images');
 
             a.setAttribute('href','javascript:void(0);');  // just for arrow cursor
-            a.addEventListener("click", function() { 
+            a.addEventListener("click", function() {
                 viewImages("#siteTable div.entry p.title a.title");  // topics
-                viewImages(".usertext-body a");  // comment section
+                viewImages(".usertext-body div.md p a");  // comment section
             }, false);
             a.appendChild(text);
             li.appendChild(a);
